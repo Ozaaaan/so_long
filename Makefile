@@ -3,7 +3,7 @@ LIBMLX = inc/MLX42
 LIBFT = inc/Libft/libft.a
 HEADERS = -I inc -I $(LIBMLX)/include
 LIBS = $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
-SRCS =	src/so_long.c src/utils.c src/map.c src/map2.c
+SRCS =	src/so_long.c src/utils.c src/map.c src/map2.c src/aff.c
 OBJS = ${SRCS:.c=.o}
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g -Wunreachable-code -Ofast
