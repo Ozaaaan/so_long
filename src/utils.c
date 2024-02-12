@@ -6,7 +6,7 @@
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 13:24:44 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/01/26 15:36:19 by ozdemir          ###   ########.fr       */
+/*   Updated: 2024/02/12 18:27:23 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,14 @@ void	exit_error(char *msg)
 	write(STDERR_FILENO, msg, ft_strlen(msg));
 	write(STDERR_FILENO, "\n", 1);
 	exit(EXIT_FAILURE);
+}
+
+void	error_handler(int ac, char ** av)
+{
+	if (ac != 2)
+		exit_error("Incorrect args");
+	if (map_is_ber(av[1]) != 1)
+		exit_error("Map is not .ber");
 }
 
 int	map_is_ber(char *filename)
@@ -52,25 +60,4 @@ int	count_tab(char **tab)
 	while (tab[i])
 		i++;
 	return (i);
-}
-
-void	show_tab(int **tab, int lig, int col)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (i < lig)
-	{
-		j = 0;
-		printf("Ligne %d : ", i);
-		while (j < col)
-		{
-			printf("%d", tab[i][j]);
-			j++;
-		}
-		printf("\n");
-		i++;
-	}
-	printf("\n");
 }

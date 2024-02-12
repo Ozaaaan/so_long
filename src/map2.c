@@ -6,13 +6,13 @@
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 17:34:05 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/01/29 12:36:26 by ozdemir          ###   ########.fr       */
+/*   Updated: 2024/02/12 18:25:56 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/so_long.h"
 
-int	is_rectangle(char **tab)
+void	is_rectangle(char **tab)
 {
 	int	i;
 	int	j;
@@ -33,7 +33,6 @@ int	is_rectangle(char **tab)
 			exit_error("Map is not rectangle");
 		i++;
 	}
-	return (0);
 }
 
 int	path_check(t_map *map, int start_x, int start_y, int **visited)
@@ -47,7 +46,6 @@ int	path_check(t_map *map, int start_x, int start_y, int **visited)
 		|| visited[start_x][start_y] == 1 || map->tab[start_x][start_y] == '1')
 		return (0);
 	visited[start_x][start_y] = 1;
-	show_tab(visited, lig, col);
 	if (map->tab[start_x][start_y] == 'C')
 	{
 		map->collectible_count--;
@@ -56,36 +54,33 @@ int	path_check(t_map *map, int start_x, int start_y, int **visited)
 	}
 	else if (map->tab[start_x][start_y] == 'E' && map->collectible_count == 0)
 		return (1);
-	if (path_check(map, start_x - 1, start_y, visited)
-		|| path_check(map, start_x + 1, start_y, visited)
-		|| path_check(map, start_x, start_y - 1, visited)
-		|| path_check(map, start_x, start_y + 1, visited))
+	if (path_check(map, start_x - 1, start_y, visited) || path_check(map,
+			start_x + 1, start_y, visited) || path_check(map, start_x, start_y
+			- 1, visited) || path_check(map, start_x, start_y + 1, visited))
 		return (1);
 	return (0);
 }
 
-int	**malloc_visited(int ligs, int cols)
+int	**malloc_visited(t_map *map, int ligs, int cols)
 {
-	int	**visited;
 	int	i;
 
 	i = 0;
-	visited = malloc(sizeof(int *) * ligs);
-	if (!visited)
+	map->visited = malloc(sizeof(int *) * ligs);
+	if (!map->visited)
 		exit_error("malloc failed");
 	while (i < ligs)
 	{
-		visited[i] = malloc(sizeof(int *) * cols);
-		if (!visited[i])
+		map->visited[i] = malloc(sizeof(int *) * cols);
+		if (!map->visited[i])
 			exit_error("malloc failed");
 		i++;
 	}
-	return (visited);
+	return (map->visited);
 }
 
 int	check_valid_path(t_map *map)
 {
-	int	**visited;
 	int	lig;
 	int	col;
 	int	i;
@@ -93,26 +88,24 @@ int	check_valid_path(t_map *map)
 
 	lig = count_tab(map->tab);
 	col = ft_strlen(map->tab[0]);
-	visited = malloc_visited(lig, col);
+	malloc_visited(map, lig, col);
 	i = 0;
 	while (i < lig)
 	{
 		j = 0;
 		while (j < col)
 		{
-			visited[i][j] = 0;
+			map->visited[i][j] = 0;
 			j++;
 		}
 		i++;
 	}
 	return (path_check(map, map->player_start[0], map->player_start[1],
-			visited));
+			map->visited));
 }
 
-t_map	*start_xy(t_map *map, int lig, int col)
+void	start_xy(t_map *map, int lig, int col)
 {
-	int	lig_start;
-	int	col_start;
 	int	i;
 	int	j;
 
@@ -122,17 +115,14 @@ t_map	*start_xy(t_map *map, int lig, int col)
 		j = 0;
 		while (j < col)
 		{
-			select_img(map, i, j);
 			if (map->tab[i][j] == 'P')
 			{
-				lig_start = i;
-				col_start = j;
-				map->player_start[0] = lig_start;
-				map->player_start[1] = col_start;
+				map->player_start[0] = i;
+				map->player_start[1] = j;
+				break ;
 			}
 			j++;
 		}
 		i++;
 	}
-	return (map);
 }

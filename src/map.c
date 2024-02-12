@@ -6,7 +6,7 @@
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 15:20:42 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/01/26 15:36:26 by ozdemir          ###   ########.fr       */
+/*   Updated: 2024/02/12 18:25:53 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ void	counter(t_map *map)
 		}
 		i++;
 	}
+	map->collectible_max = map->collectible_count;
+	map->collectible_count2 = map->collectible_count;
 }
 
 t_map	*check_map(char **tab)
@@ -63,7 +65,9 @@ char	**tab_map(char *argv)
 
 	i = 0;
 	nb_line = count_line_map(argv);
-	tab = malloc(sizeof(char **) * count_line_map(argv) + 1);
+	tab = malloc(sizeof(char *) * nb_line + 1);
+	if (!tab)
+		exit_error("Malloc error");
 	fd = open(argv, O_RDONLY);
 	line = get_next_line(fd);
 	while (line != NULL)
