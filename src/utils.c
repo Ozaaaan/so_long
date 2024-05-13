@@ -5,51 +5,57 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/17 13:24:44 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/02/12 18:27:23 by ozdemir          ###   ########.fr       */
+/*   Created: 2024/02/16 13:31:26 by ozdemir           #+#    #+#             */
+/*   Updated: 2024/03/07 10:53:07 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/so_long.h"
 
-void	exit_error(char *msg)
+void	free_map(char **tab)
 {
+	int	i;
+
+	i = 0;
+	while (tab[i])
+	{
+		free(tab[i]);
+		i++;
+	}
+	free(tab);
+}
+
+void	free_visited(int **tab)
+{
+	int	i;
+
+	i = 0;
+	while (tab[i])
+	{
+		free(tab[i]);
+		i++;
+	}
+	free(tab);
+}
+
+void	exit_error(char *msg, t_map *map)
+{
+	if (map != NULL && map->tab != NULL)
+		free_map(map->tab);
+	write(2, "Error\n", 6);
 	write(STDERR_FILENO, msg, ft_strlen(msg));
 	write(STDERR_FILENO, "\n", 1);
+	if (map != NULL)
+		mlx_terminate(map->mlx);
 	exit(EXIT_FAILURE);
 }
 
-void	error_handler(int ac, char ** av)
+void	error_handler(int ac, char **av)
 {
 	if (ac != 2)
-		exit_error("Incorrect args");
+		exit_error("Incorrect args", NULL);
 	if (map_is_ber(av[1]) != 1)
-		exit_error("Map is not .ber");
-}
-
-int	map_is_ber(char *filename)
-{
-	const char	*extension = ".ber";
-	const char	*point = strrchr(filename, '.');
-
-	if (point != NULL && strcmp(point, extension) == 0)
-		return (1);
-	return (0);
-}
-
-int	count_line_map(char *argv)
-{
-	int	i;
-	int	fd;
-
-	i = 0;
-	fd = open(argv, O_RDONLY);
-	if (fd == -1)
-		exit_error("fd error");
-	while (get_next_line(fd) != NULL)
-		i++;
-	close(fd);
-	return (i);
+		exit_error("Map is not .ber", NULL);
 }
 
 int	count_tab(char **tab)

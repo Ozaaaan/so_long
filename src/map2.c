@@ -5,115 +5,87 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/22 17:34:05 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/02/12 18:25:56 by ozdemir          ###   ########.fr       */
+/*   Created: 2024/02/19 14:33:30 by ozdemir           #+#    #+#             */
+/*   Updated: 2024/03/07 10:46:35 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/so_long.h"
 
-void	is_rectangle(char **tab)
+int	path_check(t_map *map, int x, int y)
 {
-	int	i;
-	int	j;
-	int	max;
-
-	i = 0;
-	j = 0;
-	while (tab[i][j])
-		j++;
-	max = j;
-	i++;
-	while (tab[i])
-	{
-		j = 0;
-		while (tab[i][j])
-			j++;
-		if (j != max)
-			exit_error("Map is not rectangle");
-		i++;
-	}
-}
-
-int	path_check(t_map *map, int start_x, int start_y, int **visited)
-{
-	int	lig;
-	int	col;
-
-	lig = count_tab(map->tab);
-	col = ft_strlen(map->tab[0]);
-	if (start_x < 0 || start_y < 0 || start_x >= lig || start_y >= col
-		|| visited[start_x][start_y] == 1 || map->tab[start_x][start_y] == '1')
+	if (x < 0 || y < 0 || x >= map->lig || y >= map->col
+		|| map->visited[x][y] == 1 || map->tab[x][y] == '1')
 		return (0);
-	visited[start_x][start_y] = 1;
-	if (map->tab[start_x][start_y] == 'C')
-	{
+	map->visited[x][y] = 1;
+	if (map->tab[x][y] == 'E')
+		map->found = 1;
+	if (map->tab[x][y] == 'C')
 		map->collectible_count--;
-		if (map->collectible_count == 0)
+	if (map->collectible_count == 0)
+	{
+		if (map->found == 1)
 			return (1);
 	}
-	else if (map->tab[start_x][start_y] == 'E' && map->collectible_count == 0)
-		return (1);
-	if (path_check(map, start_x - 1, start_y, visited) || path_check(map,
-			start_x + 1, start_y, visited) || path_check(map, start_x, start_y
-			- 1, visited) || path_check(map, start_x, start_y + 1, visited))
+	if (path_check(map, x - 1, y) || path_check(map, x + 1, y)
+		|| path_check(map, x, y - 1) || path_check(map, x, y + 1))
 		return (1);
 	return (0);
 }
 
-int	**malloc_visited(t_map *map, int ligs, int cols)
+void	malloc_visited(t_map *map)
 {
 	int	i;
 
 	i = 0;
-	map->visited = malloc(sizeof(int *) * ligs);
+	map->visited = malloc(sizeof(int *) * (map->lig + 1));
 	if (!map->visited)
-		exit_error("malloc failed");
-	while (i < ligs)
+		exit_error("malloc failed", NULL);
+	while (i < map->lig)
 	{
-		map->visited[i] = malloc(sizeof(int *) * cols);
+		map->visited[i] = malloc(sizeof(int) * map->col);
 		if (!map->visited[i])
-			exit_error("malloc failed");
+			exit_error("malloc failed", NULL);
 		i++;
 	}
-	return (map->visited);
+	map->visited[i] = NULL;
 }
 
 int	check_valid_path(t_map *map)
 {
-	int	lig;
-	int	col;
+	int	valid;
 	int	i;
 	int	j;
 
-	lig = count_tab(map->tab);
-	col = ft_strlen(map->tab[0]);
-	malloc_visited(map, lig, col);
+	malloc_visited(map);
 	i = 0;
-	while (i < lig)
+	while (i < map->lig)
 	{
 		j = 0;
-		while (j < col)
+		while (j < map->col)
 		{
 			map->visited[i][j] = 0;
 			j++;
 		}
 		i++;
 	}
-	return (path_check(map, map->player_start[0], map->player_start[1],
-			map->visited));
+	valid = path_check(map, map->player_start[0], map->player_start[1]);
+	free_visited(map->visited);
+	return (valid);
 }
 
-void	start_xy(t_map *map, int lig, int col)
+void	start_xy(t_map *map)
 {
 	int	i;
 	int	j;
 
+	map->lig = count_tab(map->tab);
+	map->col = ft_strlen(map->tab[0]);
 	i = 0;
-	while (i < lig)
+	while (i < map->lig)
 	{
 		j = 0;
-		while (j < col)
+		while (j < map->col)
 		{
 			if (map->tab[i][j] == 'P')
 			{

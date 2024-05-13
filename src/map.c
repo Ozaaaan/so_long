@@ -5,21 +5,51 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/17 15:20:42 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/02/12 18:25:53 by ozdemir          ###   ########.fr       */
+/*   Created: 2024/02/16 13:35:25 by ozdemir           #+#    #+#             */
+/*   Updated: 2024/03/05 13:21:36 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/so_long.h"
 
-void	counter(t_map *map)
+int	map_is_ber(char *filename)
+{
+	const char	*extension = ".ber";
+	const char	*point = strrchr(filename, '.');
+
+	if (point != NULL && strcmp(point, extension) == 0)
+		return (1);
+	return (0);
+}
+
+void	init_map(t_map *map)
+{
+	int		i;
+	char	*line;
+	int		nb_line;
+
+	i = 0;
+	line = get_next_line(map->fd);
+	nb_line = ft_strlen(line);
+	map->tab = malloc(sizeof(char *) * nb_line + 1);
+	if (!map->tab)
+		exit_error("Malloc error", map);
+	while (line != NULL)
+	{
+		line[ft_strlen(line) - 1] = 0;
+		map->tab[i] = line;
+		i++;
+		line = get_next_line(map->fd);
+	}
+	map->tab[i] = NULL;
+	close(map->fd);
+}
+
+void	check_map(t_map *map)
 {
 	int	i;
 	int	j;
 
-	map->player_count = 0;
-	map->exit_count = 0;
-	map->collectible_count = 0;
 	i = 0;
 	while (map->tab[i])
 	{
@@ -38,76 +68,51 @@ void	counter(t_map *map)
 	}
 	map->collectible_max = map->collectible_count;
 	map->collectible_count2 = map->collectible_count;
-}
-
-t_map	*check_map(char **tab)
-{
-	t_map	*map;
-
-	map = malloc(sizeof(t_map));
-	if (!map)
-		exit_error("Malloc error");
-	map->tab = tab;
-	counter(map);
 	if (map->player_count != 1 || map->exit_count != 1
 		|| map->collectible_count < 1)
-		exit_error("Invalid number of player/exit/collectible");
-	return (map);
+		exit_error("Invalid number of player/exit/collectible", map);
 }
 
-char	**tab_map(char *argv)
-{
-	char	**tab;
-	char	*line;
-	int		i;
-	int		fd;
-	int		nb_line;
-
-	i = 0;
-	nb_line = count_line_map(argv);
-	tab = malloc(sizeof(char *) * nb_line + 1);
-	if (!tab)
-		exit_error("Malloc error");
-	fd = open(argv, O_RDONLY);
-	line = get_next_line(fd);
-	while (line != NULL)
-	{
-		if (i < nb_line)
-			line[ft_strlen(line) - 1] = 0;
-		tab[i] = line;
-		i++;
-		line = get_next_line(fd);
-	}
-	tab[i] = NULL;
-	close(fd);
-	return (tab);
-}
-
-void	wall_checker(char **tab)
+void	is_rectangle(t_map *map)
 {
 	int	i;
 	int	j;
-	int	nb_line;
+	int	max;
 
 	i = 0;
-	nb_line = count_tab(tab);
-	while (tab[i])
+	max = ft_strlen(map->tab[i]);
+	while (map->tab[i])
 	{
-		if (i == 0 || i == nb_line)
+		j = 0;
+		while (map->tab[i][j])
+			j++;
+		if (j != max)
+			exit_error("Map is not rectangle", map);
+		i++;
+	}
+}
+
+void	wall_checker(t_map *map)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (map->tab[i])
+	{
+		if (i == 0 || i == map->lig - 1)
 		{
 			j = 0;
-			while (tab[i][j])
+			while (map->tab[i][j])
 			{
-				if (tab[i][j] != '1')
-					exit_error("Incorrect map");
+				if (map->tab[i][j] != '1')
+					exit_error("Incorrect map", map);
 				j++;
 			}
 		}
-		else
-		{
-			if (tab[i][0] != '1' || tab[i][ft_strlen(tab[i]) - 1] != '1')
-				exit_error("Incorrect map2");
-		}
+		else if (map->tab[i][0] != '1' || map->tab[i][ft_strlen(map->tab[i])
+			- 1] != '1')
+			exit_error("Incorrect map2", map);
 		i++;
 	}
 }

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/01 12:23:43 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/02/12 18:25:49 by ozdemir          ###   ########.fr       */
+/*   Created: 2024/02/19 14:46:00 by ozdemir           #+#    #+#             */
+/*   Updated: 2024/03/05 13:08:34 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,37 +27,50 @@ void	load_textures(t_map *map)
 		map->texture_tab[i].img = mlx_texture_to_image(map->mlx,
 				map->texture_tab[i].texture);
 		if (!map->texture_tab[i].img)
-			exit_error("Erreur img");
+			exit_error("Erreur img", NULL);
 		mlx_delete_texture(map->texture_tab[i].texture);
 		i++;
 	}
 }
 
-void	draw_map(t_map *map, int lig, int col)
+void	select_img(t_map *map, int x, int y)
+{
+	if (map->tab[y][x] == '0' || map->tab[y][x] == 'C' || map->tab[y][x] == 'E'
+		|| map->tab[y][x] == 'P')
+		mlx_image_to_window(map->mlx, map->texture_tab[0].img, x * TILE_SIZE, y
+			* TILE_SIZE);
+	if (map->tab[y][x] == '1')
+		mlx_image_to_window(map->mlx, map->texture_tab[1].img, x * TILE_SIZE, y
+			* TILE_SIZE);
+	if (map->tab[y][x] == 'C')
+		mlx_image_to_window(map->mlx, map->texture_tab[3].img, x * TILE_SIZE, y
+			* TILE_SIZE);
+	if (map->tab[y][x] == 'E')
+		mlx_image_to_window(map->mlx, map->texture_tab[4].img, x * TILE_SIZE, y
+			* TILE_SIZE);
+	if (map->tab[y][x] != 'E' && map->tab[y][x] != 'C' && map->tab[y][x] != '1'
+		&& map->tab[y][x] != '0' && map->tab[y][x] != 'P')
+		exit_error("Incorrect map.ber", map);
+}
+
+void	draw_map(t_map *map)
 {
 	int	x;
 	int	y;
 
 	y = 0;
-	while (y < col)
+	while (y < map->lig)
 	{
 		x = 0;
 		if (!map->tab[y])
 			break ;
-		while (x < lig)
+		while (x < map->col)
 		{
-			if (map->tab[y][x] == '0' || map->tab[y][x] == 'C' || map->tab[y][x] == 'E'
-			|| map->tab[y][x] == 'P')
-				mlx_image_to_window(map->mlx, map->texture_tab[0].img, x * TILE_SIZE, y * TILE_SIZE);
-			if (map->tab[y][x] == '1')
-				mlx_image_to_window(map->mlx, map->texture_tab[1].img, x * TILE_SIZE, y * TILE_SIZE);
-			if (map->tab[y][x] == 'C')
-				mlx_image_to_window(map->mlx, map->texture_tab[3].img, x * TILE_SIZE, y * TILE_SIZE);
-			if (map->tab[y][x] == 'E')
-				mlx_image_to_window(map->mlx, map->texture_tab[4].img, x * TILE_SIZE, y * TILE_SIZE);
+			select_img(map, x, y);
 			x++;
 		}
 		y++;
 	}
-	mlx_image_to_window(map->mlx, map->texture_tab[2].img, map->player_start[1] * TILE_SIZE, map->player_start[0] * TILE_SIZE);
+	mlx_image_to_window(map->mlx, map->texture_tab[2].img, map->player_start[1]
+		* TILE_SIZE, map->player_start[0] * TILE_SIZE);
 }

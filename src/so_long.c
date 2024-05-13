@@ -5,12 +5,27 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ozdemir <ozdemir@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/12 15:44:22 by ozdemir           #+#    #+#             */
-/*   Updated: 2024/02/12 18:26:10 by ozdemir          ###   ########.fr       */
+/*   Created: 2024/02/16 13:24:32 by ozdemir           #+#    #+#             */
+/*   Updated: 2024/03/11 13:20:58 by ozdemir          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/so_long.h"
+
+void	init_var(t_map *map)
+{
+	map->collectible_count = 0;
+	map->player_count = 0;
+	map->exit_count = 0;
+	map->fd = 0;
+	map->lig = 0;
+	map->col = 0;
+	map->direction = 0;
+	map->tab = NULL;
+	map->visited = NULL;
+	map->move_cpt = 0;
+	map->found = 0;
+}
 
 void	remove_collectible(t_map *map, int x, int y)
 {
@@ -41,8 +56,7 @@ void	remove_collectible(t_map *map, int x, int y)
 
 int	iswall(t_map *map, size_t x, int y)
 {
-	if (map->tab[y / TILE_SIZE][x / TILE_SIZE] == '1' || (map->tab[y
-			/ TILE_SIZE][x / TILE_SIZE] == 'E' && map->collectible_count2 > 0))
+	if (map->tab[y / TILE_SIZE][x / TILE_SIZE] == '1')
 		return (0);
 	else
 		return (1);
@@ -59,43 +73,41 @@ void	window(mlx_key_data_t keydata, void *param)
 	new_y = params->texture_tab[2].img->instances[0].y;
 	if (mlx_is_key_down(params->mlx, MLX_KEY_ESCAPE))
 		mlx_close_window(params->mlx);
-	if (keydata.key == MLX_KEY_W && keydata.action == MLX_PRESS
-		&& iswall(params, new_x, new_y - 32))
-		params->texture_tab[2].img->instances[0].y -= 32;
-	if (keydata.key == MLX_KEY_S && keydata.action == MLX_PRESS
-		&& iswall(params, new_x, new_y + 32))
-		params->texture_tab[2].img->instances[0].y += 32;
-	if (keydata.key == MLX_KEY_A && keydata.action == MLX_PRESS
-		&& iswall(params, new_x - 32, new_y))
-		params->texture_tab[2].img->instances[0].x -= 32;
-	if (keydata.key == MLX_KEY_D && keydata.action == MLX_PRESS
-		&& iswall(params, new_x + 32, new_y))
-		params->texture_tab[2].img->instances[0].x += 32;
+	if (keydata.key == MLX_KEY_W && keydata.action == MLX_PRESS)
+		up(params, new_x, new_y);
+	if (keydata.key == MLX_KEY_S && keydata.action == MLX_PRESS)
+		down(params, new_x, new_y);
+	if (keydata.key == MLX_KEY_A && keydata.action == MLX_PRESS)
+		left(params, new_x, new_y);
+	if (keydata.key == MLX_KEY_D && keydata.action == MLX_PRESS)
+		right(params, new_x, new_y);
 	remove_collectible(params, params->texture_tab[2].img->instances[0].x,
 		params->texture_tab[2].img->instances[0].y);
 }
 
-int32_t	main(int argc, char **argv)
+int	main(int ac, char **av)
 {
-	t_map	*map;
-	char	**tab;
+	t_map	map;
 
-	error_handler(argc, argv);
-	tab = tab_map(argv[1]);
-	map = check_map(tab);
-	map->mlx = mlx_init(ft_strlen(tab[0]) * TILE_SIZE, count_tab(tab)
-			* TILE_SIZE, "Jeu de fou", true);
-	if (!map->mlx)
-		exit_error("Erreur mlx init");
-	is_rectangle(map->tab);
-	wall_checker(map->tab);
-	start_xy(map, count_tab(tab), ft_strlen(tab[0]));
-	if (!check_valid_path(map))
-		exit_error("No valid path found");
-	load_textures(map);
-	draw_map(map, ft_strlen(tab[0]), count_tab(tab));
-	mlx_key_hook(map->mlx, window, map);
-	mlx_loop(map->mlx);
-	mlx_terminate(map->mlx);
+	error_handler(ac, av);
+	init_var(&map);
+	map.fd = open(av[1], O_RDONLY);
+	if (map.fd == -1)
+		exit_error("Fichier inexistant", NULL);
+	init_map(&map);
+	map.mlx = mlx_init(ft_strlen(map.tab[0]) * TILE_SIZE, count_tab(map.tab)
+			* TILE_SIZE, "so_long", true);
+	check_map(&map);
+	is_rectangle(&map);
+	start_xy(&map);
+	wall_checker(&map);
+	if (!check_valid_path(&map))
+		exit_error("No valid path found", &map);
+	load_textures(&map);
+	draw_map(&map);
+	mlx_key_hook(map.mlx, window, &map);
+	mlx_loop(map.mlx);
+	free_map(map.tab);
+	mlx_terminate(map.mlx);
 	return (0);
 }

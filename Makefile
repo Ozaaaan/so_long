@@ -3,10 +3,10 @@ LIBMLX = inc/MLX42
 LIBFT = inc/Libft/libft.a
 HEADERS = -I inc -I $(LIBMLX)/include
 LIBS = $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
-SRCS =	src/so_long.c src/utils.c src/utils2.c src/map.c src/map2.c src/aff.c
+SRCS =	src/so_long.c src/map.c src/map2.c src/utils.c src/aff.c src/player_move.c
 OBJS = ${SRCS:.c=.o}
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g -Wunreachable-code -Ofast
+CFLAGS = -Wall -Wextra -Werror -g -O0 -Wunreachable-code -Ofast
 RM = rm -rf
 
 all : $(NAME)
@@ -31,3 +31,5 @@ fclean : clean
 re : fclean all
 
 .PHONY: all, clean, fclean, re, libmlx
+
+.SILENT:
