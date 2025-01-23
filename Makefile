@@ -1,8 +1,8 @@
 NAME = so_long
-LIBMLX = inc/MLX42
+LIBMLX = inc/
 LIBFT = inc/Libft/libft.a
 HEADERS = -I inc -I $(LIBMLX)/include
-LIBS = $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
+LIBS = $(LIBMLX)libmlx42.a -ldl -lglfw -pthread -lm
 SRCS =	src/so_long.c src/map.c src/map2.c src/utils.c src/aff.c src/player_move.c
 OBJS = ${SRCS:.c=.o}
 CC = cc
